@@ -21,28 +21,26 @@ while True:
     morf = np.ones((5, 5), np.uint8)
 
     # Применяем операцию открытия (эрозия + дилатация)
-    opened_image = cv2.erode(mask, morf, iterations=1)
-    opened_image = cv2.dilate(opened_image, morf, iterations=1)
+    opened = cv2.erode(mask, morf, iterations=1)
+    opened = cv2.dilate(opened, morf, iterations=1)
 
     # Применяем операцию закрытия (дилатация + эрозия)
-    closed_image = cv2.dilate(mask, morf, iterations=1)
-    closed_image = cv2.erode(closed_image, morf, iterations=1)
+    closed = cv2.dilate(mask, morf, iterations=1)
+    closed = cv2.erode(closed, morf, iterations=1)
 
-    for cnt in frame:
-        M = cv2.moments(cnt)
-        if M['m00'] > 0:
-            area = M['m00']
-            cX = int(M['m10'] / M['m00'])
-            cY = int(M['m01'] / M['m00'])
-            print(f'Площадь объекта: {area}')
-
-            x, y, w, h = cv2.boundingRect(red_mask)
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 0), 2)
+ 
+    moments = cv2.moments(closed)
+    if ['m00'] != 0:
+        x = int(moments['m10'] / moments['m00'])
+        y = int(moments['m01'] / moments['m00'])
+        x, y, w, h = cv2.boundingRect(red_mask)
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 0), 2)
+        print(f'Площадь объекта: {moments['m00']}')
 
     cv2.imshow('Original Frame', frame) # Выводим оригинальное изображение и площадь найденных обьектов
     # cv2.imshow('Threshold', thresholded_mask) # Фильтрация
-    cv2.imshow('Opening', opened_image) # Открытие (эрозия + дилатация)
-    cv2.imshow('Closing', closed_image) # Закрытие (дилатация + эрозия)
+    cv2.imshow('Opening', opened) # Открытие (эрозия + дилатация)
+    cv2.imshow('Closing', closed) # Закрытие (дилатация + эрозия)
     # cv2.imshow('Red Frame', red_frame) # Фрейм с красным
 
     if cv2.waitKey(1) & 0xFF == 27:
